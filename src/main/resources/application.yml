@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: temp
+  redis:
+    host: localhost
+    port: 6379
+  cloud:
+    gateway:
+      routes:
+      - id: temp-service
+        uri: http://localhost:9090
+        predicates:
+        - Path=/temp/**
+        filters:
+        - name: RequestRateLimiter
+          args:
+            keyResolver: '#{@apiKeyResolver}'
+            redis-rate-limiter.redis-rate-limiter: reactiveStringRedisTemplate
+            redis-rate-limiter.replenishRate: 10
+            redis-rate-limiter.burstCapacity: 20 
+  main:
+    web-application-type: none      
+                         
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    reactor.ipc.netty: DEBUG
+    reactor.netty: DEBUG
+
+management.endpoints.web.exposure.include: '*'
